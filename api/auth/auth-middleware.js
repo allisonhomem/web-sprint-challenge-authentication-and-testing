@@ -11,12 +11,14 @@ const validReqBody = (req, res, next) => {
         res.status(422).json({message: "username and password required"})
     }
     else {
+        req.username = username.trim()
+        req.password = password.trim()
         next();
     }
 }
 
 const checkUsernameExists = async (req, res, next) => {
-    const alreadyUsername = await Users.findBy({username: req.body.username})
+    const alreadyUsername = await Users.findBy({username: req.username})
 
         if(alreadyUsername.length){
             res.status(422).json({message: "username taken"})
@@ -27,7 +29,7 @@ const checkUsernameExists = async (req, res, next) => {
 }
 
 const checkUsernameValid = async (req, res, next) => {
-    const validUser = await Users.findBy({username: req.body.username})
+    const validUser = await Users.findBy({username: req.username})
 
         if(!validUser.length){
             res.status(422).json({message: "invalid credentials"})
@@ -51,7 +53,7 @@ const checkPasswordValid = (req, res, next) => {
         return jwt.sign(payload, JWT_SECRET, options)
     }
 
-    if (bcrypt.compareSync(req.body.password, req.user.password)){
+    if (bcrypt.compareSync(req.password, req.user.password)){
         const token = buildToken(req.user)
 
         res.status(200).json({
